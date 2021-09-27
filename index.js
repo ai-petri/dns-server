@@ -1,4 +1,5 @@
 const dgram = require("dgram");
+const http = require("http");
 const createMessage = require("./createMessage");
 const decodeMessage = require("./decodeMessage");
 
@@ -44,6 +45,77 @@ socket2.on("message", (data,info)=>
 
 socket.bind(53);
 socket2.bind(8080);
+
+
+
+const server = http.createServer((req,res)=>
+{
+
+    switch(req.url)
+    {
+        case "/":
+            res.end();
+            break;
+
+        case "/records":
+            res.writeHead(200, "OK",
+            {
+                "Content-Type": "application/json"
+            });
+            res.end(JSON.stringify(Object.fromEntries(records)));
+            break;
+        case "/add":
+            let data = "";
+            req.on("data", chunk=>data+=chunk);
+            req.on("end", _=>{
+
+                let response = {};
+
+                if(/\{(\"[a-z0-9.]+\"\:\"[a-z0-9.]+\")(,(\r?\n)*\"[a-z0-9]+\"\:\"[a-z0-9.]+\")*\}/i.test(data))
+                {
+                    let entries = Object.entries(JSON.parse(data));
+                    let updated = 0;                   
+                    entries.forEach(([key,value])=>{
+                        if(records.get(key))
+                        {
+                            updated ++;
+                        }
+                        records.set(key,value);
+                    });
+                   
+                    response =
+                    {
+                        success:true,
+                        recieved:entries.length,
+                        updated,
+                        added:entries.length - updated
+                    }   
+                }
+                else
+                {
+                    response =
+                    {
+                        success:false
+                    }
+                }
+                res.writeHead(200, "OK",
+                {
+                    "Access-Control-Allow-Origin": "*",
+                    //"Content-Type": "application/json"
+                });
+                res.end(JSON.stringify(response));
+            })
+            
+            break;
+
+        default:
+            res.writeHead(404, "Not Found");
+            res.end();
+
+    }
+});
+
+server.listen(80);
 
 
 
