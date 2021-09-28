@@ -1,5 +1,7 @@
 const dgram = require("dgram");
 const http = require("http");
+const path = require("path");
+const fs = require("fs");
 const createMessage = require("./createMessage");
 const decodeMessage = require("./decodeMessage");
 
@@ -55,11 +57,37 @@ const server = http.createServer((req,res)=>
     req.on("data", chunk=>data+=chunk);
 
     req.on("end", _=>{
+        if(req.url == "/")
+        {
+            let stream = fs.createReadStream(path.join(__dirname,"public","index.html"));
+            stream.pipe(res);
+            return;
+        }
+
+
         if(!req.url.startsWith("/api/"))
         {
+            let parts = req.url.split("?")[0].substring(1).split("/");
+            if(parts.filter(part=> !/^[^\/\\?%*:|"<>]*$/.test(part)).length > 0)
+            {
+                res.writeHead(400, "Bad Request");
+                res.end("<h1>400 Bad Request</h1>");
+                return;
+            }
 
-            res.end();
-            return;
+            let file = path.join(__dirname, "public", ...parts);
+            if(fs.existsSync(file))
+            {
+                let stream = fs.createReadStream(file);
+                stream.pipe(res);
+            }
+            else
+            {
+                res.writeHead(404, "Not Found");
+                res.end("<h1>404 Not Found</h1>");
+            }
+             
+            return;        
         }
 
 
