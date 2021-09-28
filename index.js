@@ -50,27 +50,25 @@ socket2.bind(8080);
 
 const server = http.createServer((req,res)=>
 {
+    let data = "";
+    let response;
+    req.on("data", chunk=>data+=chunk);
 
-    switch(req.url)
-    {
-        case "/":
+    req.on("end", _=>{
+        if(!req.url.startsWith("/api/"))
+        {
+
             res.end();
-            break;
+            return;
+        }
 
-        case "/records":
-            res.writeHead(200, "OK",
-            {
-                "Content-Type": "application/json"
-            });
-            res.end(JSON.stringify(Object.fromEntries(records)));
-            break;
-        case "/add":
-            let data = "";
-            req.on("data", chunk=>data+=chunk);
-            req.on("end", _=>{
 
-                let response = {};
-
+        switch(req.url)
+        {
+            case "/api/records":
+                response = Object.fromEntries(records);
+                break;
+            case "/api/records/add":
                 if(/\{(\"[a-z0-9.]+\"\:\"[a-z0-9.]+\")(,(\r?\n)*\"[a-z0-9]+\"\:\"[a-z0-9.]+\")*\}/i.test(data))
                 {
                     let entries = Object.entries(JSON.parse(data));
@@ -98,21 +96,48 @@ const server = http.createServer((req,res)=>
                         success:false
                     }
                 }
-                res.writeHead(200, "OK",
-                {
-                    "Access-Control-Allow-Origin": "*",
-                    //"Content-Type": "application/json"
-                });
-                res.end(JSON.stringify(response));
-            })
-            
-            break;
+                break;
 
-        default:
+            case "/api/records/delete":
+                if(/\[\"[a-z0-9.]+\"(,\"[a-z0-9.]+\")*\]/.test(data))
+                {
+                    let names = JSON.parse(data);
+                    let deleted = 0;
+                    names.forEach(name => deleted += records.delete(name));
+                    response =
+                    {
+                        success:true,
+                        recieved:names.length,
+                        deleted
+                    }
+                }
+                else
+                {
+                    response =
+                    {
+                        success:false
+                    }
+                }
+
+        }
+
+
+        if(response)
+        {
+            res.writeHead(200, "OK",
+            {
+                "Access-Control-Allow-Origin":"*",
+                "Content-Type":"application/json"
+            });
+            res.end(JSON.stringify(response));
+        }
+        else
+        {
             res.writeHead(404, "Not Found");
             res.end();
+        }
 
-    }
+    });
 });
 
 server.listen(80);
