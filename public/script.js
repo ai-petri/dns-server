@@ -1,0 +1,23 @@
+document.querySelectorAll(".switch").forEach(el=>
+{
+    el.parentNode.addEventListener("click",e=>
+    {
+        if(el.classList.contains("on"))
+        {
+            el.classList.remove("on")
+        }
+        else
+        {
+            el.classList.add("on");
+        }
+
+        if(el.parentNode.classList.contains("on"))
+        {
+            el.parentNode.classList.remove("on");
+        }
+        else
+        {
+            el.parentNode.classList.add("on");
+        }
+    })
+})
