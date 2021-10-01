@@ -5,6 +5,8 @@ const fs = require("fs");
 const createMessage = require("./createMessage");
 const decodeMessage = require("./decodeMessage");
 
+var enabled = true;
+
 var socket = dgram.createSocket("udp4");
 var socket2 = dgram.createSocket("udp4");
 
@@ -16,6 +18,8 @@ var clients = new Map();
 
 socket.on("message", (data, info)=>
 {
+    if(!enabled) return;
+
     let message = decodeMessage(data);
 
     let name = message.questions[0].qname;
@@ -95,6 +99,14 @@ const server = http.createServer((req,res)=>
         {
             case "/api/records":
                 response = Object.fromEntries(records);
+                break;
+            case "/api/server/enable":
+                enabled = true;
+                response = {enabled};
+                break;
+            case "/api/server/disable":
+                enabled = false;
+                response = {enabled};
                 break;
             case "/api/records/add":
                 if(/\{(\"[a-z0-9.]+\"\:\"[a-z0-9.]+\")(,(\r?\n)*\"[a-z0-9]+\"\:\"[a-z0-9.]+\")*\}/i.test(data))

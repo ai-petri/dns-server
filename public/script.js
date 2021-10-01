@@ -4,21 +4,29 @@ document.querySelectorAll(".switch").forEach(el=>
     {
         if(el.classList.contains("on"))
         {
-            el.classList.remove("on")
+            el.classList.remove("on");
+            fetch("/api/server/disable").then(r=>r.json()).then(obj=>{
+
+                if(obj.enabled == false && el.parentNode.classList.contains("on"))
+                {
+                    el.parentNode.classList.remove("on");
+                }
+
+            });        
         }
         else
         {
             el.classList.add("on");
+            fetch("/api/server/enable").then(r=>r.json()).then(obj=>{
+
+                if(obj.enabled == true && !el.parentNode.classList.contains("on"))
+                {
+                    el.parentNode.classList.add("on");
+                }
+
+            });           
         }
 
-        if(el.parentNode.classList.contains("on"))
-        {
-            el.parentNode.classList.remove("on");
-        }
-        else
-        {
-            el.parentNode.classList.add("on");
-        }
     })
 });
 
