@@ -19,6 +19,13 @@
                     <div class="switch on"></div>
                 </div>
             </div>
+            <button id="addButton" onclick="hide('#addButton'); show('#recordForm');">Add</button>
+            <form id="recordForm" onsubmit="addRecord(this); return false;" onreset="hide('#recordForm'); show('#addButton')">
+                <input type="text" name="name">
+                <input type="text" name="ip">
+                <input type="submit" value="OK">
+                <input type="reset" value="Cancel">
+            </form>
             <ul id="records"></ul>
 
 

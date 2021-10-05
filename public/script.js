@@ -48,3 +48,31 @@ function getRecords()
 
     });
 }
+
+
+function addRecord(form)
+{
+    var name = form["name"].value;
+    var ip = form["ip"].value;
+    form.reset();
+
+    fetch(location + "api/records/add", {method: "POST", body: JSON.stringify({[name]:ip})})
+    .then(r=>r.json())
+    .then(o=>{
+        if(o.added || o.updated)
+        {
+            getRecords();
+        }
+    });
+
+}
+
+function show(selector)
+{
+    document.querySelector(selector).style.display = "block";
+}
+
+function hide(selector)
+{
+    document.querySelector(selector).style.display = "none";
+}

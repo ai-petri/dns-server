@@ -2,6 +2,10 @@ body{
     font-family: Arial, Helvetica, sans-serif;
 }
 
+input, button{
+    margin: 5px;
+}
+
 .switch-container{
     width: 50px;
     height: 25px;
@@ -40,4 +44,8 @@ body{
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
+}
+
+#recordForm{
+    display: none;
 }
