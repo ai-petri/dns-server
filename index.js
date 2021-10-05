@@ -72,7 +72,7 @@ const server = http.createServer((req,res)=>
         if(!req.url.startsWith("/api/"))
         {
             let parts = req.url.split("?")[0].substring(1).split("/");
-            if(parts.filter(part=> !/^[^\/\\?%*:|"<>]*$/.test(part)).length > 0)
+            if(parts.filter(part=> !/^[^\/\\?%*:|"<>]*$/.test(part) || part=="").length > 0)
             {
                 res.writeHead(400, "Bad Request");
                 res.end("<h1>400 Bad Request</h1>");
@@ -80,7 +80,7 @@ const server = http.createServer((req,res)=>
             }
 
             let file = path.join(__dirname, "public", ...parts);
-            if(fs.existsSync(file))
+            if(fs.existsSync(file) && fs.statSync(file).isFile())
             {
                 let stream = fs.createReadStream(file);
                 stream.pipe(res);
